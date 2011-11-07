@@ -1,12 +1,12 @@
 BACKENDS = {
         'default': {
-            'ENGINE': 'lighty.thumbnailer.engines.pil',
+            'ENGINE': 'lighty.thumbnailer.engine.pil',
             'STORAGE': 'lighty.thumbnailer.storage.redis',
-            'PREFFIX': 'thumbnail-default-',
+            'PREFFIX': 'thumbnail-default',
         },
         'opaque': {
-            'ENGINE': 'lighty.thumbnailer.engines.pgmagick',
+            'ENGINE': 'lighty.thumbnailer.engine.pgmagick',
             'STORAGE': 'lighty.thumbnailer.storage.redis',
-            'PREFFIX': 'thumbnail-opaque-'
+            'PREFFIX': 'thumbnail-opaque'
         }
 }
