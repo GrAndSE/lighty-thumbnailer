@@ -2,6 +2,8 @@
 '''
 import hashlib
 
+from .storage import Storage
+
 
 class BaseImage(object):
     '''Wrapper around image file
@@ -101,25 +103,47 @@ class Thumbnail(object):
                                   option_hash)
         return self._key
 
+    def _gen_path(self):
+        '''Get the path for new file
+        '''
+        hash = hashlib.sha1(self._get_key()).hexdigest()
+        return '%s/%s/%s.%s' % (hash[0:2], hash[2:4], hash[4:], self.format)
+
     def _get_path(self):
         '''Get url for new file
         '''
         if not self.image:
             return self.image.path
-        hash = hashlib.sha1(self._get_key()).hexdigest()
-        return '%s/%s/%s.%s' % (hash[0:2], hash[2:4], hash[4:], self.format)
+        return self._get_image().path
 
     def _get_image(self):
         '''Check datastore for image exists, chen check is image on specified
         path exists and if all ok return an image on path specified. Otherway
         create new image and return it
         '''
+        # Check is value in datastorage
         key = self._get_key()
-        #if 
-        #path = 
-        return None
+        path = Storage.get_storage(self.backend).get(key)
+        if path is not None:
+            # Check is path exists and could be read
+            try:
+                return BaseImage.create(self.backend, path)
+            except Exception as e:
+                print e
+        # Create new image and store the data
+        self.image = BaseImage.thumbnail(self.backend, self.source.path,
+                                         self.geometry, self.crop,
+                                         self.overflow, self.look)
+        path = self._gen_path()
+        self.image(path)
+        Storage.get_storage(self.backend).set(key, path)
+        return self.image
 
     @property
     def url(self):
         return "%s/%s/%s" % (self.backend['MEDIA_URL'],
-                             self.backend['PREFFIX'], self.image.path)
+                             self.backend['PREFFIX'], self._get_path())
+
+    @property
+    def path(self):
+        return self._get_path()
