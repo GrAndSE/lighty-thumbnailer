@@ -2,7 +2,7 @@
 '''
 import hashlib
 
-from .storage import Storage
+from .storage import BaseStorage
 
 
 class BaseImage(object):
@@ -112,7 +112,7 @@ class Thumbnail(object):
     def _get_path(self):
         '''Get url for new file
         '''
-        if not self.image:
+        if self.image is not None:
             return self.image.path
         return self._get_image().path
 
@@ -123,7 +123,7 @@ class Thumbnail(object):
         '''
         # Check is value in datastorage
         key = self._get_key()
-        path = Storage.get_storage(self.backend).get(key)
+        path = BaseStorage.get_storage(self.backend).get(key)
         if path is not None:
             # Check is path exists and could be read
             try:
@@ -136,7 +136,7 @@ class Thumbnail(object):
                                          self.overflow, self.look)
         path = self._gen_path()
         self.image(path)
-        Storage.get_storage(self.backend).set(key, path)
+        BaseStorage.get_storage(self.backend).set(key, path)
         return self.image
 
     @property

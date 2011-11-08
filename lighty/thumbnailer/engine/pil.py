@@ -12,12 +12,15 @@ class Image(BaseImage):
         '''Create an image instance
         '''
         self.path = path
-        self.image = PILImage(path) if os.path.exists(path) else PILImage
+        if os.path.exists(path):
+            self.image = self._read()
+        else:
+            self.image = None
 
     def _read(self):
         '''Read file
         '''
-        self.image = PILImage(self.path)
+        self.image = PILImage.open(self.path)
 
     def _write(self, format='jpg'):
         '''Save into file

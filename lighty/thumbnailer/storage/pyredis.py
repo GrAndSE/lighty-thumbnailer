@@ -6,7 +6,7 @@ from . import BaseStorage
 class Storage(BaseStorage):
     '''Storage to get and put the data
     '''
-    __slots__ = ('_instance', '__init__', 'connection', 'get', 'set', )
+    __slots__ = ('__init__', 'connection', 'get', 'set', )
 
     def __init__(self, backend):
         '''Create new Storage instance

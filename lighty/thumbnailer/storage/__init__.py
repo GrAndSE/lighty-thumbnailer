@@ -8,10 +8,26 @@ class BaseStorage(object):
     _instance = None
 
     def __new__(cls, *args, **kwargs):
+        '''Get an instance or create the new one
+        '''
+        print cls._instance
         if not cls._instance:
             cls._instance = super(BaseStorage, cls).__new__(cls, *args,
                                                             **kwargs)
+        print dir(cls._instance)
         return cls._instance
+
+
+
+    @classmethod
+    def get_storage(cls, backend):
+        '''Get the storage frm backend configuration
+        '''
+        module = __import__(backend['STORAGE'], globals(), locals(), 'Storage')
+        storage_class = getattr(module, 'Storage')
+        print storage_class
+        return storage_class(backend)
+
 
     def get(self, key):
         '''Just raise because this method would be implemented in subclasses
