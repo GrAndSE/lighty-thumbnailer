@@ -1,37 +1,40 @@
-import os
 from PIL import Image as PILImage
 
 from lighty.thumbnailer.image import BaseImage
+
+
+FORMATS = {
+        'jpg': 'jpeg',
+        'png': 'png',
+}
 
 
 class Image(BaseImage):
     '''Base image class
     '''
 
-    def __init__(self, path=None, image=None):
+    def __init__(self, backend, path=None, image=None):
         '''Create an image instance
         '''
-        self.path = path
-        if path is not None and os.path.exists(path):
-            self.image = self._read()
-        else:
-            self.image = image
+        super(Image, self).__init__(backend, path, image)
 
-    def _read(self):
+    def _read(self, path):
         '''Read file
         '''
-        self.image = PILImage.open(self.path)
+        self.image = PILImage.open(path)
 
-    def _write(self, format='jpeg'):
+    def _write(self, path, extension):
         '''Save into file
         '''
-        self.image.save(self.path, format)
+        if extension not in FORMATS:
+            raise ValueError('Unsupported file extension')
+        self.image.save(path, FORMATS[extension])
 
     def _size(self):
         '''Get the image size
         '''
         if self.image is None:
-            self._read()
+            self._read(self.full_path())
         return self.image.size
 
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):

@@ -10,11 +10,14 @@ class BaseImage(object):
     '''Wrapper around image file
     '''
 
-    def __init__(self, path=None, image=None):
+    def __init__(self, backend, path=None, image=None):
         '''Path to file work with
         '''
         self.path = path
         self.image = image
+        self.backend = backend
+        if path is not None:
+            self.open(force=False)
 
     @classmethod
     def create(cls, backend, path):
@@ -23,7 +26,7 @@ class BaseImage(object):
         '''
         module = __import__(backend['ENGINE'], globals(), locals(), 'Image')
         image_class = getattr(module, 'Image')
-        return image_class(path)
+        return image_class(backend, path)
 
     @classmethod
     def thumbnail(cls, backend, source_path, geometry, crop, overflow, look):
@@ -31,20 +34,34 @@ class BaseImage(object):
         image = image.crop(crop, geometry, overflow, look)
         return image
 
+    def full_path(self, path=None):
+        '''Get full path to file
+        '''
+        return os.path.join(self.backend['MEDIA_ROOT'], path or self.path)
+
+    def open(self, path=None, force=True):
+        '''Read file from path specified or self.path
+        '''
+        full_path = self.full_path(path)
+        if force or os.path.exists(full_path):
+            self._read(full_path)
+
     def save(self):
         '''Save to file
         '''
-        dirs = self.path.rsplit('/', 1)[0]
-        if not os.path.exists(dirs):
-            os.makedirs(dirs)
-        self._write()
+        dirs, name = self.path.rsplit('/', 1)
+        path = os.path.join(self.backend['MEDIA_ROOT'], dirs)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        extension = name.rsplit('.', 1)[1]
+        self._write(os.path.join(path, name), extension)
 
     def _read(self):
         '''Read file object
         '''
         raise NotImplementedError('_read not implemented')
 
-    def _write(self, format):
+    def _write(self, path, extension):
         '''Write to file
         '''
         raise NotImplementedError('_write not implemented')
@@ -59,14 +76,13 @@ class BaseImage(object):
         '''
         def get_crop_value(length, value, units):
             return units == 'px' and value or int(length * value / 100)
-        print crop
         width, height = self._size()
         top_crop = get_crop_value(height, *crop[0])
         left_crop = get_crop_value(width, *crop[1])
         bottom_crop = get_crop_value(height, *crop[2])
         right_crop = get_crop_value(width, *crop[3])
         image = self._crop(top_crop, left_crop, bottom_crop, right_crop)
-        return self.__class__(image=image)
+        return self.__class__(self.backend, image=image)
 
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
         '''Library dependent crop
@@ -116,7 +132,7 @@ class Thumbnail(object):
         return '%s/%s/%s.%s' % (hash[0:2], hash[2:4], hash[4:], self.format)
 
     def _get_path(self):
-        '''Get url for new file
+        '''Get relative path for new file
         '''
         if self.image is not None:
             return self.image.path
@@ -130,8 +146,9 @@ class Thumbnail(object):
         # Check is value in datastorage and is path exists and could be read
         key = self._get_key()
         path = BaseStorage.get_storage(self.backend).get(key)
-        if path is not None and os.path.exists(path):    
-            return BaseImage.create(self.backend, path)
+        if path is not None:
+            if os.path.exists(os.path.join(self.backend['MEDIA_ROOT'], path)):
+                return BaseImage.create(self.backend, path)
         # Create new image and store the data
         self.image = BaseImage.thumbnail(self.backend, self.source.path,
                                          self.geometry, self.crop,
