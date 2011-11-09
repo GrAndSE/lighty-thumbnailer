@@ -1,6 +1,7 @@
 '''Classes used to wrap images and manipulate with images
 '''
 import hashlib
+import os
 
 from .storage import BaseStorage
 
@@ -26,34 +27,39 @@ class BaseImage(object):
 
     @classmethod
     def thumbnail(cls, backend, source_path, geometry, crop, overflow, look):
-        image = cls.create(backend, source_path).crop(crop)
+        image = cls.create(backend, source_path)
+        image = image.crop(crop, geometry, overflow, look)
         return image
 
     def save(self):
         '''Save to file
         '''
-        raise NotImplemented('save not implemented')
+        dirs = self.path.rsplit('/', 1)[0]
+        if not os.path.exists(dirs):
+            os.makedirs(dirs)
+        self._write()
 
     def _read(self):
         '''Read file object
         '''
-        raise NotImplemented('_read not implemented')
+        raise NotImplementedError('_read not implemented')
 
-    def _write(self):
+    def _write(self, format):
         '''Write to file
         '''
-        raise NotImplemented('_write not implemented')
+        raise NotImplementedError('_write not implemented')
 
     def _size(self):
         '''Get an image size
         '''
-        raise NotImplemented('_size is not implemented')
+        raise NotImplementedError('_size is not implemented')
 
-    def crop(self, crop, geometry, overflow, scale):
+    def crop(self, crop, geometry, overflow, look):
         '''Crop image
         '''
         def get_crop_value(length, value, units):
             return units == 'px' and value or int(length * value / 100)
+        print crop
         width, height = self._size()
         top_crop = get_crop_value(height, *crop[0])
         left_crop = get_crop_value(width, *crop[1])
@@ -65,7 +71,7 @@ class BaseImage(object):
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
         '''Library dependent crop
         '''
-        raise NotImplemented('_crop not implemented')
+        raise NotImplementedError('_crop not implemented')
 
 
 class Thumbnail(object):
@@ -121,21 +127,18 @@ class Thumbnail(object):
         path exists and if all ok return an image on path specified. Otherway
         create new image and return it
         '''
-        # Check is value in datastorage
+        # Check is value in datastorage and is path exists and could be read
         key = self._get_key()
         path = BaseStorage.get_storage(self.backend).get(key)
-        if path is not None:
-            # Check is path exists and could be read
-            try:
-                return BaseImage.create(self.backend, path)
-            except Exception as e:
-                print e
+        if path is not None and os.path.exists(path):    
+            return BaseImage.create(self.backend, path)
         # Create new image and store the data
         self.image = BaseImage.thumbnail(self.backend, self.source.path,
                                          self.geometry, self.crop,
                                          self.overflow, self.look)
         path = self._gen_path()
-        self.image(path)
+        self.image.path = path
+        self.image.save()
         BaseStorage.get_storage(self.backend).set(key, path)
         return self.image
 

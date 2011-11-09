@@ -10,14 +10,10 @@ class BaseStorage(object):
     def __new__(cls, *args, **kwargs):
         '''Get an instance or create the new one
         '''
-        print cls._instance
         if not cls._instance:
             cls._instance = super(BaseStorage, cls).__new__(cls, *args,
                                                             **kwargs)
-        print dir(cls._instance)
         return cls._instance
-
-
 
     @classmethod
     def get_storage(cls, backend):
