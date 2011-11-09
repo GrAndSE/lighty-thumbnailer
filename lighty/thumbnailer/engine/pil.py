@@ -36,5 +36,5 @@ class Image(BaseImage):
 
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
         width, height = self.image.size
-        return self.image.crop((top_crop, left_crop,
-                                height - bottom_crop, width - right_crop))
+        return self.image.crop((left_crop, top_crop,
+                                width - right_crop, height - bottom_crop))
