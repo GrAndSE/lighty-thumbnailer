@@ -31,8 +31,8 @@ class BaseImage(object):
     @classmethod
     def thumbnail(cls, backend, source_path, geometry, crop, overflow, look):
         image = cls.create(backend, source_path)
-        image = image.crop(crop, geometry, overflow, look)
-        return image
+        image = image.crop(crop)
+        return image.scale(geometry, overflow, look)
 
     def full_path(self, path=None):
         '''Get full path to file
@@ -71,7 +71,7 @@ class BaseImage(object):
         '''
         raise NotImplementedError('_size is not implemented')
 
-    def crop(self, crop, geometry, overflow, look):
+    def crop(self, crop):
         '''Crop image
         '''
         def get_crop_value(length, value, units):
@@ -88,6 +88,49 @@ class BaseImage(object):
         '''Library dependent crop
         '''
         raise NotImplementedError('_crop not implemented')
+
+    def scale(self, geometry, overflow, look):
+        '''Scale the image including overflow and look
+        '''
+        original_width, original_height = self.size()
+        to_width, to_height = geometry
+        original_ratio = float(original_width) / original_height
+        to_ratio = float(to_width) / to_height
+        top_crop, left_crop, bottom_crop, right_crop = 0, 0, 0, 0
+        if original_ratio == to_ratio:
+            width, height = to_width, to_height
+        elif original_ratio < to_ratio:
+            if overflow == 'x' or overflow == 'both':
+                width, height = to_width, to_height
+                diff = int(original_height * to_ratio) - original_width
+                if look[1] == 'left':
+                    right_crop = diff
+                elif look[1] == 'right':
+                    left_crop = diff
+                else:
+                    left_crop = right_crop = diff / 2
+            else:
+                width = to_width
+                height = int(width * to_ratio)
+        elif original_ratio > to_ratio:
+            if overflow == 'y' or overflow == 'both':
+                width, height = to_width, to_height
+                diff = int(original_width / to_ratio) - original_height
+                if look[0] == 'top':
+                    top_crop = diff
+                elif look[0] == 'bottom':
+                    bottom_crop = diff
+                else:
+                    top_crop = bottom_crop = diff / 2
+            else:
+                height = to_height
+                width = int(height * to_ratio)
+        if top_crop or left_crop or bottom_crop or right_crop:
+            source = self.crop((top_crop, left_crop, bottom_crop, right_crop))
+        else:
+            source = self
+        image = source._scale(width, height)
+        return self.__class__(self.backend, image=image)
 
 
 class Thumbnail(object):
