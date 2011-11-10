@@ -21,7 +21,6 @@ class BaseStorage(object):
         '''
         module = __import__(backend['STORAGE'], globals(), locals(), 'Storage')
         storage_class = getattr(module, 'Storage')
-        print storage_class
         return storage_class(backend)
 
 

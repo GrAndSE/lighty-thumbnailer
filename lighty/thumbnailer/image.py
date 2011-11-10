@@ -59,17 +59,20 @@ class BaseImage(object):
     def _read(self):
         '''Read file object
         '''
-        raise NotImplementedError('_read not implemented')
+        raise NotImplementedError('_read was not implemented for %s' % 
+                                  self.__class__.__name__)
 
     def _write(self, path, extension):
         '''Write to file
         '''
-        raise NotImplementedError('_write not implemented')
+        raise NotImplementedError('_write was not implemented for %s' % 
+                                  self.__class__.__name__)
 
     def _size(self):
         '''Get an image size
         '''
-        raise NotImplementedError('_size is not implemented')
+        raise NotImplementedError('_size was not implemented for %s' % 
+                                  self.__class__.__name__)
 
     def crop(self, crop):
         '''Crop image
@@ -87,50 +90,74 @@ class BaseImage(object):
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
         '''Library dependent crop
         '''
-        raise NotImplementedError('_crop not implemented')
+        raise NotImplementedError('_crop was not implemented for %s' % 
+                                  self.__class__.__name__)
 
     def scale(self, geometry, overflow, look):
         '''Scale the image including overflow and look
         '''
-        original_width, original_height = self.size()
+        def eval_crop(diff_x, diff_y):
+            top_crop, left_crop, bottom_crop, right_crop = 0, 0, 0, 0
+            if look[1] == 'left':
+                right_crop = diff_x
+            elif look[1] == 'right':
+                left_crop = diff_x
+            else:
+                left_crop = right_crop = diff_x / 2
+            if look[0] == 'top':
+                top_crop = diff_y
+            elif look[0] == 'bottom':
+                bottom_crop = diff_y
+            else:
+                top_crop = bottom_crop = diff_y / 2
+            return top_crop, left_crop, bottom_crop, right_crop
+        # Get width, height and ratios
+        original_width, original_height = self._size()
         to_width, to_height = geometry
         original_ratio = float(original_width) / original_height
         to_ratio = float(to_width) / to_height
-        top_crop, left_crop, bottom_crop, right_crop = 0, 0, 0, 0
-        if original_ratio == to_ratio:
-            width, height = to_width, to_height
-        elif original_ratio < to_ratio:
-            if overflow == 'x' or overflow == 'both':
-                width, height = to_width, to_height
-                diff = int(original_height * to_ratio) - original_width
-                if look[1] == 'left':
-                    right_crop = diff
-                elif look[1] == 'right':
-                    left_crop = diff
+        crop = (0, 0, 0, 0)
+        width, height = to_width, to_height
+        # Eval crops and ratio
+        if original_ratio != to_ratio:
+            if overflow == 'both':
+                if to_height < original_height:
+                    diff_x = original_width - to_width
+                    diff_y = original_height - to_height
                 else:
-                    left_crop = right_crop = diff / 2
+                    diff_x = original_width - int(original_height * to_ratio)
+                    diff_y = 0
+                crop = eval_crop(diff_x, diff_y)
             else:
-                width = to_width
-                height = int(width * to_ratio)
-        elif original_ratio > to_ratio:
-            if overflow == 'y' or overflow == 'both':
-                width, height = to_width, to_height
-                diff = int(original_width / to_ratio) - original_height
-                if look[0] == 'top':
-                    top_crop = diff
-                elif look[0] == 'bottom':
-                    bottom_crop = diff
+                if original_ratio > to_ratio:
+                    if overflow == 'x':
+                        diff = original_width - int(original_height * to_ratio)
+                        crop = eval_crop(diff, 0)
+                    else:
+                        width = to_width
+                        height = int(width / original_ratio)
                 else:
-                    top_crop = bottom_crop = diff / 2
-            else:
-                height = to_height
-                width = int(height * to_ratio)
+                    if overflow == 'y':
+                        diff = int(original_height * to_ratio) - original_width
+                        crop = eval_crop(0, diff)
+                    else:
+                        height = to_height
+                        width = int(height * original_ratio)
+        # Make crop if needed
+        top_crop, left_crop, bottom_crop, right_crop = crop
         if top_crop or left_crop or bottom_crop or right_crop:
-            source = self.crop((top_crop, left_crop, bottom_crop, right_crop))
+            source = self.crop(((top_crop, 'px'), (left_crop, 'px'), 
+                                (bottom_crop, 'px'), (right_crop, 'px')))
         else:
             source = self
         image = source._scale(width, height)
         return self.__class__(self.backend, image=image)
+
+    def _scale(self, width, height):
+        '''Library dependent image scale
+        '''
+        raise NotImplementedError('_scale was not implemented for %s' % 
+                                  self.__class__.__name__)
 
 
 class Thumbnail(object):

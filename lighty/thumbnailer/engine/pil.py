@@ -38,6 +38,13 @@ class Image(BaseImage):
         return self.image.size
 
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
+        '''Crop an image
+        '''
         width, height = self.image.size
         return self.image.crop((left_crop, top_crop,
                                 width - right_crop, height - bottom_crop))
+
+    def _scale(self, width, height):
+        '''Scale image to specified size
+        '''
+        return self.image.resize((width, height))
