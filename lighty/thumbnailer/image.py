@@ -224,10 +224,13 @@ class Thumbnail(object):
         create new image and return it
         '''
         # Check is value in datastorage and is path exists and could be read
+        datastore = BaseDatastore.get_instance(self.backend)
         key = self._get_key()
-        path = BaseDatastore.get_datastore(self.backend).get(key)
+        path = datastore.get(key)
         if path is not None:
-            if os.path.exists(os.path.join(self.backend['MEDIA_ROOT'], path)):
+            full_path = os.path.join(self.backend['MEDIA_ROOT'], path)
+            storage = BaseStorage.get_instance(self.backend)
+            if storage.exists(full_path):
                 return BaseImage.create(self.backend, path)
         # Create new image and store the data
         self.image = BaseImage.thumbnail(self.backend, self.source.path,
@@ -236,13 +239,12 @@ class Thumbnail(object):
         path = self._gen_path()
         self.image.path = path
         self.image.save()
-        BaseDatastore.get_datastore(self.backend).set(key, path)
+        datastore.set(key, path)
         return self.image
 
     @property
     def url(self):
-        return "%s/%s/%s" % (self.backend['MEDIA_URL'],
-                             self.backend['PREFFIX'], self._get_path())
+        return "%s/%s" % (self.backend['MEDIA_URL'],  self._get_path())
 
     @property
     def path(self):
