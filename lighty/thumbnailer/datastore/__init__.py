@@ -1,9 +1,9 @@
 '''Base datastore class
 '''
-from ..util import InstanceForClass
+from ..util import InstanceForClass, Singleton
 
 
-class BaseDatastore(InstanceForClass):
+class BaseDatastore(InstanceForClass, Singleton):
     '''Base datastore class - singleton defines get and set methods
     '''
     _class_name = 'Datastore'

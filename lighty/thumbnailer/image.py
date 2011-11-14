@@ -4,11 +4,16 @@ import hashlib
 import os
 
 from .datastore import BaseDatastore
+from .storage import BaseStorage
+
+from .util import InstanceForClass
 
 
-class BaseImage(object):
+class BaseImage(InstanceForClass):
     '''Wrapper around image file
     '''
+    _param_name = 'ENGINE'
+    _class_name = 'Image'
 
     def __init__(self, backend, path=None, image=None):
         '''Path to file work with
@@ -24,9 +29,7 @@ class BaseImage(object):
         '''Create instance of image class from specified backend associated
         with specified path
         '''
-        module = __import__(backend['ENGINE'], globals(), locals(), 'Image')
-        image_class = getattr(module, 'Image')
-        return image_class(backend, path)
+        return cls.get_instance(backend, path)
 
     @classmethod
     def thumbnail(cls, backend, source_path, geometry, crop, overflow, look):

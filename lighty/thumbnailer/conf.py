@@ -1,16 +1,18 @@
 BACKENDS = {
         'default': {
             'ENGINE': 'lighty.thumbnailer.engine.pil',
-            'DATASTORE': 'lighty.thumbnailer.datastore.pyredis',
-            'PREFFIX': 'thumbnail-default',
-            'MEDIA_URL': 'media',
             'FORMAT': 'jpg',
+            'DATASTORE': 'lighty.thumbnailer.datastore.pyredis',
+            'MEDIA_URL': 'media',
+            'PREFFIX': 'thumbnail-default',
+            'STORAGE': 'lighty.thumbnailer.storage.file',
         },
         'opaque': {
             'ENGINE': 'lighty.thumbnailer.engine.pgmagick',
-            'DATASTORE': 'lighty.thumbnailer.datastore.redis',
-            'PREFFIX': 'thumbnail-opaque',
-            'MEDIA_URL': 'media',
             'FROMAT': 'png',
+            'DATASTORE': 'lighty.thumbnailer.datastore.redis',
+            'MEDIA_URL': 'media',
+            'PREFFIX': 'thumbnail-opaque',
+            'STORAGE': 'lighty.thumbnailer.storage.file',
         }
 }

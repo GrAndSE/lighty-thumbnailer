@@ -15,15 +15,15 @@ class Singleton(object):
         return cls._instance
 
 
-class InstanceForClass(Singleton):
+class InstanceForClass(object):
     '''Class contains method
     '''
 
     @classmethod
-    def get_instance(cls, backend):
+    def get_instance(cls, backend, *args, **kwargs):
         '''Get storage for backend
         '''
         module = __import__(backend[cls._param_name], globals(), locals(),
                             cls._class_name)
         storage_class = getattr(module, cls._class_name)
-        return storage_class(backend)
+        return storage_class(backend, *args, **kwargs)
