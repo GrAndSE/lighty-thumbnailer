@@ -3,7 +3,7 @@
 import hashlib
 import os
 
-from .datastore import BaseStorage
+from .datastore import BaseDatastore
 
 
 class BaseImage(object):
@@ -215,7 +215,7 @@ class Thumbnail(object):
         '''
         # Check is value in datastorage and is path exists and could be read
         key = self._get_key()
-        path = BaseStorage.get_storage(self.backend).get(key)
+        path = BaseDatastore.get_datastore(self.backend).get(key)
         if path is not None:
             if os.path.exists(os.path.join(self.backend['MEDIA_ROOT'], path)):
                 return BaseImage.create(self.backend, path)
@@ -226,7 +226,7 @@ class Thumbnail(object):
         path = self._gen_path()
         self.image.path = path
         self.image.save()
-        BaseStorage.get_storage(self.backend).set(key, path)
+        BaseDatastore.get_storage(self.backend).set(key, path)
         return self.image
 
     @property

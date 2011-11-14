@@ -1,9 +1,9 @@
-'''Base storage class
+'''Base datastore class
 '''
 
 
-class BaseStorage(object):
-    '''Base storage class - singleton defines get and set methods
+class BaseDatastore(object):
+    '''Base datastore class - singleton defines get and set methods
     '''
     _instance = None
 
@@ -11,17 +11,18 @@ class BaseStorage(object):
         '''Get an instance or create the new one
         '''
         if not cls._instance:
-            cls._instance = super(BaseStorage, cls).__new__(cls, *args,
-                                                            **kwargs)
+            cls._instance = super(BaseDatastore, cls).__new__(cls, *args,
+                                                              **kwargs)
         return cls._instance
 
     @classmethod
-    def get_storage(cls, backend):
-        '''Get the storage frm backend configuration
+    def get_datastore(cls, backend):
+        '''Get the datastore from backend configuration
         '''
-        module = __import__(backend['STORAGE'], globals(), locals(), 'Storage')
-        storage_class = getattr(module, 'Storage')
-        return storage_class(backend)
+        module = __import__(backend['DATASTORE'], globals(), locals(),
+                            'Datastore')
+        datastore_class = getattr(module, 'Datastore')
+        return datastore_class(backend)
 
 
     def get(self, key):
