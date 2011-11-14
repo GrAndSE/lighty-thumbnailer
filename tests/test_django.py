@@ -43,7 +43,7 @@ try:
         {{ thumb.url }}
     {% endthumbnail %}
     ''')
-    print template.render(Context({'image': 'test.jpg'}))
+    print template.render(Context({'image': 'tests.jpg'}))
 except ImportError as e:
     import sys
     import traceback
