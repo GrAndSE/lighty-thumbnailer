@@ -3,7 +3,7 @@
 import hashlib
 import os
 
-from .storage import BaseStorage
+from .datastore import BaseStorage
 
 
 class BaseImage(object):
