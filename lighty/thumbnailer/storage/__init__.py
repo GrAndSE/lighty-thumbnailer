@@ -1,11 +1,16 @@
 '''Package contains the storage system
 '''
-from ..util import Singleton
+from ..util import InstanceForClass, Singleton
 
 
-class BaseStorage(Singleton):
+class BaseStorage(InstanceForClass, Singleton):
     '''Base class for any storage
     '''
+
+    def __init__(self, backend):
+        '''Create new BaseStorage instance
+        '''
+        self.backend = backend
 
     def open(self, path, mode='rb'):
         '''Open file for reading

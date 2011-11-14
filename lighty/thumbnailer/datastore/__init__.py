@@ -1,29 +1,19 @@
 '''Base datastore class
 '''
-from ..util import Singleton
+from ..util import InstanceForClass
 
 
-class BaseDatastore(Singleton):
+class BaseDatastore(InstanceForClass):
     '''Base datastore class - singleton defines get and set methods
     '''
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        '''Get an instance or create the new one
-        '''
-        if not cls._instance:
-            cls._instance = super(BaseDatastore, cls).__new__(cls, *args,
-                                                              **kwargs)
-        return cls._instance
+    _class_name = 'Datastore'
+    _param_name = 'DATASTORE'
 
     @classmethod
     def get_datastore(cls, backend):
         '''Get the datastore from backend configuration
         '''
-        module = __import__(backend['DATASTORE'], globals(), locals(),
-                            'Datastore')
-        datastore_class = getattr(module, 'Datastore')
-        return datastore_class(backend)
+        return cls.get_instance(backend)
 
 
     def get(self, key):
