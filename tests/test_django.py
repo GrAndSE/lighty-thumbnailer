@@ -6,11 +6,13 @@ from lighty.thumbnailer import image
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] =  'tests.django_settings'
     from django.conf import settings
+    from django.template import Context, Template
 
     test_backend = {}
     test_backend.update(conf.BACKENDS['default'])
     test_backend['MEDIA_ROOT'] = 'tests/imgs/'
     test_backend['MEDIA_URL'] = settings.MEDIA_URL
+    conf.BACKENDS['django'] = test_backend
     print image.Thumbnail(test_backend, 'test.jpg', (150, 150),
                           ((0, 'px'), (0, 'px'), (0, 'px'), (0, 'px')),
                           'both', ('top', 'left'), 'jpg').url
@@ -34,6 +36,14 @@ try:
     print image.Thumbnail(test_backend, 'tests.jpg', (400, 600),
                           ((15, '%'), (0, 'px'), (0, 'px'), (0, 'px')),
                           'none', ('middle', 'center'), 'jpg').url, "\n"
+
+    template = Template('''{% load thumbnailer %}
+    {% thumbnail image "400x600" backend="django" crop="15% 0px 0px 0px" overflow="none" loot="middle center" format="jpg" as thumb %}
+        {{ thumb.path }} 
+        {{ thumb.url }}
+    {% endthumbnail %}
+    ''')
+    print template.render(Context({'image': 'test.jpg'}))
 except ImportError as e:
     import sys
     import traceback
