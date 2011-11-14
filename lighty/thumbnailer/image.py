@@ -226,7 +226,7 @@ class Thumbnail(object):
         path = self._gen_path()
         self.image.path = path
         self.image.save()
-        BaseDatastore.get_storage(self.backend).set(key, path)
+        BaseDatastore.get_datastore(self.backend).set(key, path)
         return self.image
 
     @property
