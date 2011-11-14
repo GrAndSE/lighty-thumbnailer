@@ -1,0 +1,16 @@
+Metadata-Version: 1.0
+Name: lighty-thumbnailer
+Version: 0.1
+Summary: sorl.thumbnail inspired image thumbnailer
+Home-page: https://github.com/GrAndSE/lighty-thumbnailer
+Author: Andrey Grygoryev
+Author-email: undeadgrandse@gmail.com
+License: BSD
+Description: Simply image thumbnailer
+        
+Platform: any
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Multimedia :: Graphics
