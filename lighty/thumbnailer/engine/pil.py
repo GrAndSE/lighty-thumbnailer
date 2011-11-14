@@ -28,7 +28,7 @@ class Image(BaseImage):
         '''
         if extension not in FORMATS:
             raise ValueError('Unsupported file extension')
-        self.image.save(path, FORMATS[extension])
+        self.image.save(path, FORMATS[extension], quality=95)
 
     def _size(self):
         '''Get the image size
@@ -47,4 +47,4 @@ class Image(BaseImage):
     def _scale(self, width, height):
         '''Scale image to specified size
         '''
-        return self.image.resize((width, height))
+        return self.image.resize((width, height), resample=PILImage.ANTIALIAS)

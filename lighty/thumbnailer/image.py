@@ -45,7 +45,11 @@ class BaseImage(InstanceForClass):
     def full_path(self, path=None):
         '''Get full path to file
         '''
-        return os.path.join(self.backend['MEDIA_ROOT'], path or self.path)
+        file_path = path or self.path
+        if file_path.startswith('/'):
+            return file_path
+        else:
+            return os.path.join(self.backend['MEDIA_ROOT'], file_path)
 
     def open(self, path=None, force=True):
         '''Read file from path specified or self.path
@@ -167,6 +171,18 @@ class BaseImage(InstanceForClass):
         raise NotImplementedError('_scale was not implemented for %s' % 
                                   self.__class__.__name__)
 
+    @property
+    def width(self):
+        '''Get image height
+        '''
+        return self._size()[0]
+
+    @property
+    def height(self):
+        '''Get image width
+        '''
+        return self._size()[1]
+
 
 class Thumbnail(object):
     '''Image class used to store data
@@ -241,6 +257,22 @@ class Thumbnail(object):
         self.image.save()
         datastore.set(key, path)
         return self.image
+
+    @property
+    def width(self):
+        '''Get thumbnail width
+        '''
+        if self.image is None:
+            return self._get_image().width
+        return self.image.width
+
+    @property
+    def height(self):
+        '''Get thumbnail width
+        '''
+        if self.image is None:
+            return self._get_image().height
+        return self.image.height
 
     @property
     def url(self):

@@ -36,7 +36,7 @@ class ThumbnailNodeBase(Node):
 
 class ThumbnailNode(ThumbnailNodeBase):
     child_nodelists = ('nodelist_file', 'nodelist_empty')
-    error_msg = ('Syntax error. Expected: ``thumbnail source geometry '
+    error_msg = ('Syntax error. Expected: ``thumbnailer source_path geometry '
                  '[key1=val1 key2=val2...] as var``')
 
     def __init__(self, parser, token):
@@ -60,6 +60,8 @@ class ThumbnailNode(ThumbnailNodeBase):
 
     def _render(self, context):
         file_ = self.file_.resolve(context)
+        if not isinstance(file_, basestring):
+            file_ = file_.path
         options = {
             'crop': '0px 0px 0px 0px',
             'backend': 'default',
@@ -72,7 +74,6 @@ class ThumbnailNode(ThumbnailNodeBase):
         resolved = dict([(name, expr.resolve(context))
                          for name, expr in self.options])
         options.update(resolved)
-        print resolved, '\n\n', options
         if file_:
             thumbnail = Thumbnail(
                     source_path=file_,
@@ -102,5 +103,5 @@ class ThumbnailNode(ThumbnailNodeBase):
 
 
 @register.tag
-def thumbnail(parser, token):
+def thumbnailer(parser, token):
     return ThumbnailNode(parser, token)

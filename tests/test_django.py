@@ -38,7 +38,7 @@ try:
                           'none', ('middle', 'center'), 'jpg').url, "\n"
 
     template = Template('''{% load thumbnailer %}
-    {% thumbnail image "400x600" backend="django" crop="15% 0px 0px 0px" overflow="none" loot="middle center" format="jpg" as thumb %}
+    {% thumbnailer image "400x600" backend="django" crop="15% 0px 0px 0px" overflow="none" loot="middle center" format="jpg" as thumb %}
         {{ thumb.path }} 
         {{ thumb.url }}
     {% endthumbnail %}
