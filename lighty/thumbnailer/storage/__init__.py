@@ -6,6 +6,8 @@ from ..util import InstanceForClass, Singleton
 class BaseStorage(InstanceForClass, Singleton):
     '''Base class for any storage
     '''
+    _param_name = 'STORAGE'
+    _class_name = 'Storage'
 
     def __init__(self, backend):
         '''Create new BaseStorage instance

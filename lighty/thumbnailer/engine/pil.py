@@ -34,7 +34,7 @@ class Image(BaseImage):
         '''Get the image size
         '''
         if self.image is None:
-            self._read(self.full_path())
+            self.open(self.full_path())
         return self.image.size
 
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
