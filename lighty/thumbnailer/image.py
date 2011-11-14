@@ -3,6 +3,11 @@
 import hashlib
 import os
 
+try:
+    import cStringIO as StringIO
+except:
+    import StringIO
+
 from .datastore import BaseDatastore
 from .storage import BaseStorage
 
@@ -46,18 +51,18 @@ class BaseImage(InstanceForClass):
         '''Read file from path specified or self.path
         '''
         full_path = self.full_path(path)
-        if force or os.path.exists(full_path):
-            self._read(full_path)
+        storage = BaseStorage.get_instance(self.backend)
+        if force or storage.exists(full_path):
+            self._read(storage.open(full_path))
 
     def save(self):
         '''Save to file
         '''
-        dirs, name = self.path.rsplit('/', 1)
-        path = os.path.join(self.backend['MEDIA_ROOT'], dirs)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        extension = name.rsplit('.', 1)[1]
-        self._write(os.path.join(path, name), extension)
+        extension = self.path.rsplit('.', 1)[1]
+        out = StringIO.StringIO()
+        self._write(out, extension)
+        BaseStorage.get_instance(self.backend).save(self.path, out.getvalue())
+        out.close()
 
     def _read(self):
         '''Read file object
@@ -202,7 +207,9 @@ class Thumbnail(object):
         '''Get the path for new file
         '''
         hash = hashlib.sha1(self._get_key()).hexdigest()
-        return '%s/%s/%s.%s' % (hash[0:2], hash[2:4], hash[4:], self.format)
+        return "%s.%s" % (os.path.join(self.backend['PREFFIX'], hash[0:2],
+                                       hash[2:4], hash[4:]),
+                          self.format)
 
     def _get_path(self):
         '''Get relative path for new file
