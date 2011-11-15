@@ -6,9 +6,7 @@ from django.conf import settings
 from django.template import Library, Node, NodeList, TemplateSyntaxError
 from django.utils.encoding import smart_str
 
-from lighty.thumbnailer.conf import BACKENDS
-from lighty.thumbnailer.image import Thumbnail
-from lighty.thumbnailer.utils import parse_size, parse_crop, parse_look
+from lighty.thumbnailer.helpers import make_thumbnail
 
 register = Library()
 kw_pat = re.compile(r'^(?P<key>[\w]+)=(?P<value>.+)$')
@@ -59,33 +57,21 @@ class ThumbnailNode(ThumbnailNodeBase):
             parser.delete_first_token()
 
     def _render(self, context):
+        '''Inner template node rendering
+        '''
+        # Get arguments
         file_ = self.file_.resolve(context)
         if not isinstance(file_, basestring):
-            file_ = file_.path
-        options = {
-            'crop': '0px 0px 0px 0px',
-            'backend': 'default',
-            'geometry': '0x0',
-            'look': 'top left',
-            'overflow': 'none',
-            'filters': '',
-            'format': 'jpg',
-        }
+            file_ = unicode(file_)
         resolved = dict([(name, expr.resolve(context))
                          for name, expr in self.options])
-        options.update(resolved)
+        resolved['source_path'] = file_
+        # Generate thumbnail
         if file_:
-            thumbnail = Thumbnail(
-                    source_path=file_,
-                    backend=BACKENDS[options['backend']],
-                    geometry=parse_size(options['geometry']),
-                    crop=parse_crop(options['crop']),
-                    overflow=options['overflow'],
-                    look=parse_look(options['look']),
-                    format=options['format'],
-            )
+            thumbnail = make_thumbnail(**resolved)
         else:
             return self.nodelist_empty.render(context)
+        # Puh context`
         context.push()
         context[self.as_var] = thumbnail
         output = self.nodelist_file.render(context)

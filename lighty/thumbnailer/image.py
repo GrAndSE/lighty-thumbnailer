@@ -71,19 +71,19 @@ class BaseImage(InstanceForClass):
     def _read(self):
         '''Read file object
         '''
-        raise NotImplementedError('_read was not implemented for %s' % 
+        raise NotImplementedError('_read was not implemented for %s' %
                                   self.__class__.__name__)
 
     def _write(self, path, extension):
         '''Write to file
         '''
-        raise NotImplementedError('_write was not implemented for %s' % 
+        raise NotImplementedError('_write was not implemented for %s' %
                                   self.__class__.__name__)
 
     def _size(self):
         '''Get an image size
         '''
-        raise NotImplementedError('_size was not implemented for %s' % 
+        raise NotImplementedError('_size was not implemented for %s' %
                                   self.__class__.__name__)
 
     def crop(self, crop):
@@ -102,7 +102,7 @@ class BaseImage(InstanceForClass):
     def _crop(self, top_crop, left_crop, bottom_crop, right_crop):
         '''Library dependent crop
         '''
-        raise NotImplementedError('_crop was not implemented for %s' % 
+        raise NotImplementedError('_crop was not implemented for %s' %
                                   self.__class__.__name__)
 
     def scale(self, geometry, overflow, look):
@@ -158,7 +158,7 @@ class BaseImage(InstanceForClass):
         # Make crop if needed
         top_crop, left_crop, bottom_crop, right_crop = crop
         if top_crop or left_crop or bottom_crop or right_crop:
-            source = self.crop(((top_crop, 'px'), (left_crop, 'px'), 
+            source = self.crop(((top_crop, 'px'), (left_crop, 'px'),
                                 (bottom_crop, 'px'), (right_crop, 'px')))
         else:
             source = self
@@ -168,7 +168,7 @@ class BaseImage(InstanceForClass):
     def _scale(self, width, height):
         '''Library dependent image scale
         '''
-        raise NotImplementedError('_scale was not implemented for %s' % 
+        raise NotImplementedError('_scale was not implemented for %s' %
                                   self.__class__.__name__)
 
     @property
