@@ -5,14 +5,10 @@ from lighty.thumbnailer import image
 
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] =  'tests.django_settings'
-    from django.conf import settings
     from django.template import Context, Template
+    import lighty.thumbnailer.integration.django
 
-    test_backend = {}
-    test_backend.update(conf.BACKENDS['default'])
-    test_backend['MEDIA_ROOT'] = 'tests/imgs/'
-    test_backend['MEDIA_URL'] = settings.MEDIA_URL
-    conf.BACKENDS['django'] = test_backend
+    test_backend = conf.BACKENDS['django']
     print image.Thumbnail(test_backend, 'test.jpg', (150, 150),
                           ((0, 'px'), (0, 'px'), (0, 'px'), (0, 'px')),
                           'both', ('top', 'left'), 'jpg').url

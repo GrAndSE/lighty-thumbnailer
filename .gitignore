@@ -1,6 +1,6 @@
 build/*
 dist/*
-tests/imgs/thumbnail-*
+tests/imgs/thumbnail*
 *.egg-info/*
 *.swp
 *.pyc
