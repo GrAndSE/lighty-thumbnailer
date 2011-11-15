@@ -26,6 +26,7 @@ class BaseImage(InstanceForClass):
         self.path = path
         self.image = image
         self.backend = backend
+        self.storage = BaseStorage.get_instance(backend)
         if path is not None:
             self.open(force=False)
 
@@ -55,9 +56,8 @@ class BaseImage(InstanceForClass):
         '''Read file from path specified or self.path
         '''
         full_path = self.full_path(path)
-        storage = BaseStorage.get_instance(self.backend)
-        if force or storage.exists(full_path):
-            self._read(storage.open(full_path))
+        if force or self.storage.exists(full_path):
+            self._read(self.storage.open(full_path))
 
     def save(self):
         '''Save to file
@@ -65,7 +65,7 @@ class BaseImage(InstanceForClass):
         extension = self.path.rsplit('.', 1)[1]
         out = StringIO.StringIO()
         self._write(out, extension)
-        BaseStorage.get_instance(self.backend).save(self.path, out.getvalue())
+        self.storage.save(self.path, out.getvalue())
         out.close()
 
     def _read(self):
@@ -188,13 +188,16 @@ class Thumbnail(object):
     '''Image class used to store data
     '''
     __slots__ = ('backend', 'source', 'geometry', 'crop', 'overflow', 'look',
-                 'format', 'image', '_key')
+                 'format', 'image', '_key', 'storage', 'datastore', 
+                 'width', 'height', 'url', 'path', '_get_path', '_get_key',
+                 '_gen_path', '_get_image')
 
     def __init__(self, backend, source_path, geometry, crop, overflow, look,
                  format):
         '''Create new image instance
         '''
         super(Thumbnail, self).__init__()
+        # Options
         self.backend = backend
         self.source = BaseImage.create(backend, source_path)
         self.geometry = geometry
@@ -204,6 +207,9 @@ class Thumbnail(object):
         self.format = format
         self.image = None
         self._key = None
+        # Datastore, storage, etc. initialization
+        self.storage = BaseStorage.get_instance(backend)
+        self.datastore = BaseDatastore.get_instance(backend)
 
     def _get_key(self):
         '''Get datastore key
@@ -240,13 +246,11 @@ class Thumbnail(object):
         create new image and return it
         '''
         # Check is value in datastorage and is path exists and could be read
-        datastore = BaseDatastore.get_instance(self.backend)
         key = self._get_key()
-        path = datastore.get(key)
+        path = self.datastore.get(key)
         if path is not None:
             full_path = os.path.join(self.backend['MEDIA_ROOT'], path)
-            storage = BaseStorage.get_instance(self.backend)
-            if storage.exists(full_path):
+            if self.storage.exists(full_path):
                 return BaseImage.create(self.backend, path)
         # Create new image and store the data
         self.image = BaseImage.thumbnail(self.backend, self.source.path,
@@ -255,7 +259,7 @@ class Thumbnail(object):
         path = self._gen_path()
         self.image.path = path
         self.image.save()
-        datastore.set(key, path)
+        self.datastore.set(key, path)
         return self.image
 
     @property
