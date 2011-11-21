@@ -12,27 +12,10 @@ register = Library()
 kw_pat = re.compile(r'^(?P<key>[\w]+)=(?P<value>.+)$')
 
 
-class ThumbnailNodeBase(Node):
-    """
-    A Node that renders safely
-    """
+class ThumbnailNode(Node):
+    '''Node makes thumbnail
+    '''
     nodelist_empty = NodeList()
-
-    def render(self, context):
-        try:
-            return self._render(context)
-        except Exception:
-            if settings.THUMBNAIL_DEBUG:
-                raise
-            #logger.error('Thumbnail tag failed:', exc_info=sys.exc_info())
-            traceback.print_exc(file=sys.stderr)
-            return self.nodelist_empty.render(context)
-
-    def _render(self, context):
-        raise NotImplemented()
-
-
-class ThumbnailNode(ThumbnailNodeBase):
     child_nodelists = ('nodelist_file', 'nodelist_empty')
     error_msg = ('Syntax error. Expected: ``thumbnailer source_path geometry '
                  '[key1=val1 key2=val2...] as var``')
@@ -56,11 +39,22 @@ class ThumbnailNode(ThumbnailNodeBase):
             self.nodelist_empty = parser.parse(('endthumbnail',))
             parser.delete_first_token()
 
+    def render(self, context):
+        try:
+            return self._render(context)
+        except Exception:
+            if settings.THUMBNAIL_DEBUG:
+                raise
+            traceback.print_exc(file=sys.stderr)
+            return self.nodelist_empty.render(context)
+
     def _render(self, context):
         '''Inner template node rendering
         '''
         # Get arguments
         file_ = self.file_.resolve(context)
+        if file_ is None or file_ == 'None':
+            raise ValueError('Null source image')
         if not isinstance(file_, basestring):
             file_ = unicode(file_)
         resolved = dict([(name, expr.resolve(context))
