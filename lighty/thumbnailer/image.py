@@ -38,10 +38,11 @@ class BaseImage(InstanceForClass):
         return cls.get_instance(backend, path)
 
     @classmethod
-    def thumbnail(cls, backend, source_path, geometry, crop, overflow, look):
+    def thumbnail(cls, backend, source_path, geometry, crop, overflow, look,
+                  fit):
         image = cls.create(backend, source_path)
         image = image.crop(crop)
-        return image.scale(geometry, overflow, look)
+        return image.scale(geometry, overflow, look, fit)
 
     def full_path(self, path=None):
         '''Get full path to file
@@ -105,7 +106,7 @@ class BaseImage(InstanceForClass):
         raise NotImplementedError('_crop was not implemented for %s' %
                                   self.__class__.__name__)
 
-    def scale(self, geometry, overflow, look, fit=False):
+    def scale(self, geometry, overflow, look, fit):
         '''Scale the image including overflow and look
         '''
         def eval_crop(diff_x, diff_y):
@@ -197,12 +198,12 @@ class Thumbnail(object):
     '''Image class used to store data
     '''
     __slots__ = ('backend', 'source', 'geometry', 'crop', 'overflow', 'look',
-                 'format', 'image', '_key', 'storage', 'datastore', 
+                 'fit', 'format', 'image', '_key', 'storage', 'datastore', 
                  'width', 'height', 'url', 'path', '_get_path', '_get_key',
                  '_gen_path', '_get_image')
 
-    def __init__(self, backend, source_path, geometry, crop, overflow, look,
-                 format):
+    def __init__(self, backend, source_path, geometry, crop, overflow, look, 
+                 fit=True, format='jpg'):
         '''Create new image instance
         '''
         super(Thumbnail, self).__init__()
@@ -213,6 +214,7 @@ class Thumbnail(object):
         self.overflow = overflow
         self.crop = crop
         self.look = look
+        self.fit = fit
         self.format = format
         self.image = None
         self._key = None
@@ -228,8 +230,9 @@ class Thumbnail(object):
         source_hash = hashlib.sha1(self.source.path).hexdigest()
         crop = tuple([str(c[0]) + (c[1] == '%' and 'pc' or c[1])
                       for c in self.crop])
-        option_hash = '-'.join([str(i) for i in self.geometry + crop +
-                                self.look] + [self.overflow, self.format])
+        option_hash = '-'.join([str(i) for i in self.geometry + crop + 
+                                self.look] + 
+                                [self.overflow, str(self.fit), self.format])
         self._key = '%s-%s-%s' % (self.backend['PREFFIX'], source_hash,
                                   option_hash)
         return self._key
@@ -264,7 +267,7 @@ class Thumbnail(object):
         # Create new image and store the data
         self.image = BaseImage.thumbnail(self.backend, self.source.path,
                                          self.geometry, self.crop,
-                                         self.overflow, self.look)
+                                         self.overflow, self.look, self.fit)
         path = self._gen_path()
         self.image.path = path
         self.image.save()

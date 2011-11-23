@@ -51,6 +51,15 @@ def parse_crop(crop_string):
                 return top_crop, left_crop, bottom_crop, parse_units(parts[3])
 
 
+def parse_fit(fit):
+    '''Parse fit string
+    '''
+    try:
+        return fit is True or fit == 'True' or int(fit) > 0
+    except:
+        return False
+
+
 def parse_look(look_string):
     '''Parse look string
     '''

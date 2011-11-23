@@ -12,6 +12,7 @@ class defaults:
     QUALITY = '95'
     LOOK = 'middle center'
     OVERFLOW = 'none'
+    FIT = True
     FILTERS = ''
 
 

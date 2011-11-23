@@ -1,8 +1,8 @@
 from .conf import BACKENDS
 from .image import Thumbnail
-from .utils import parse_crop, parse_look, parse_size
+from .utils import parse_crop, parse_fit, parse_look, parse_size
 
-FROM_BACKEND = ('filters', 'look', 'overflow', 'quality', 'format', )
+FROM_BACKEND = ('filters', 'look', 'overflow', 'fit', 'quality', 'format', )
 
 default_options = {
     'crop': '0px 0px 0px 0px',
@@ -24,5 +24,6 @@ def make_thumbnail(**args):
                 crop=parse_crop(options['crop']),
                 overflow=options['overflow'],
                 look=parse_look(options['look']),
+                fit=parse_fit(options['fit']),
                 format=options['format'],
             )
