@@ -118,9 +118,9 @@ class BaseImage(InstanceForClass):
             else:
                 left_crop = right_crop = diff_x / 2
             if look[0] == 'top':
-                top_crop = diff_y
-            elif look[0] == 'bottom':
                 bottom_crop = diff_y
+            elif look[0] == 'bottom':
+                top_crop = diff_y
             else:
                 top_crop = bottom_crop = diff_y / 2
             return top_crop, left_crop, bottom_crop, right_crop
@@ -136,20 +136,27 @@ class BaseImage(InstanceForClass):
             if overflow == 'both':
                 if fit:
                     if original_ratio > to_ratio:
-                        diff_x = int(to_height * original_ratio - to_width)
+                        scale = float(to_height) / original_height
+                        to = float(to_height) * original_ratio
+                        diff_x = int((to - to_width) / scale)
                         diff_y = 0
                     else:
                         diff_x = 0
-                        diff_y = int(to_width / original_ratio - to_height)
+                        scale = float(to_width) / original_width
+                        to = float(to_width) / original_ratio
+                        diff_y = int((to - to_height) / scale)
+                    print (diff_x, diff_y)
                 else:
                     if to_height < original_height:
                         diff_x = original_width - to_width
                         diff_y = original_height - to_height
                     else:
-                        diff_x = original_width - int(original_height * 
+                        diff_x = original_width - int(original_height /
                                                       to_ratio)
                         diff_y = 0
+                    print (diff_x, diff_y)
                 crop = eval_crop(diff_x, diff_y)
+                print crop
             else:
                 if original_ratio > to_ratio:
                     if overflow == 'x':

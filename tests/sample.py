@@ -27,3 +27,7 @@ print 400, 600, 'none', 'middle', 'center'
 print image.Thumbnail(test_backend, 'tests.jpg', (400, 600),
                       ((15, '%'), (0, 'px'), (0, 'px'), (0, 'px')),
                       'none', ('middle', 'center'), False, 'jpg').path, "\n"
+print 150, 150, 'both', 'middle', 'center'
+print image.Thumbnail(test_backend, 'tests.jpg', (150, 150),
+                      ((0, 'px'), (0, 'px'), (0, 'px'), (0, 'px')),
+                      'both', ('middle', 'center'), True, 'jpg').path, "\n"
