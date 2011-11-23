@@ -145,7 +145,6 @@ class BaseImage(InstanceForClass):
                         scale = float(to_width) / original_width
                         to = float(to_width) / original_ratio
                         diff_y = int((to - to_height) / scale)
-                    print (diff_x, diff_y)
                 else:
                     if to_height < original_height:
                         diff_x = original_width - to_width
@@ -154,9 +153,7 @@ class BaseImage(InstanceForClass):
                         diff_x = original_width - int(original_height /
                                                       to_ratio)
                         diff_y = 0
-                    print (diff_x, diff_y)
                 crop = eval_crop(diff_x, diff_y)
-                print crop
             else:
                 if original_ratio > to_ratio:
                     if overflow == 'x':

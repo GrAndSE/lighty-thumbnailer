@@ -66,4 +66,4 @@ def parse_look(look_string):
     look_y, look_x = look_string.split(' ')
     if look_y not in LOOK_Y or look_x not in LOOK_X:
         raise ValueError('Unsupported look string')
-    return look_x, look_y
+    return look_y, look_x
