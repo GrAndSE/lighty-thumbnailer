@@ -105,7 +105,7 @@ class BaseImage(InstanceForClass):
         raise NotImplementedError('_crop was not implemented for %s' %
                                   self.__class__.__name__)
 
-    def scale(self, geometry, overflow, look):
+    def scale(self, geometry, overflow, look, fit=False):
         '''Scale the image including overflow and look
         '''
         def eval_crop(diff_x, diff_y):
@@ -133,12 +133,21 @@ class BaseImage(InstanceForClass):
         # Eval crops and ratio
         if original_ratio != to_ratio:
             if overflow == 'both':
-                if to_height < original_height:
-                    diff_x = original_width - to_width
-                    diff_y = original_height - to_height
+                if fit:
+                    if original_ratio > to_ratio:
+                        diff_x = int(to_height * original_ratio - to_width)
+                        diff_y = 0
+                    else:
+                        diff_x = 0
+                        diff_y = int(to_width / original_ratio - to_height)
                 else:
-                    diff_x = original_width - int(original_height * to_ratio)
-                    diff_y = 0
+                    if to_height < original_height:
+                        diff_x = original_width - to_width
+                        diff_y = original_height - to_height
+                    else:
+                        diff_x = original_width - int(original_height * 
+                                                      to_ratio)
+                        diff_y = 0
                 crop = eval_crop(diff_x, diff_y)
             else:
                 if original_ratio > to_ratio:

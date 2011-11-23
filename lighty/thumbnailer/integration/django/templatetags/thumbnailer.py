@@ -42,7 +42,7 @@ class ThumbnailNode(Node):
     def render(self, context):
         try:
             return self._render(context)
-        except Exception:
+        except:
             if settings.THUMBNAIL_DEBUG:
                 raise
             traceback.print_exc(file=sys.stderr)

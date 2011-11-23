@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
         name='lighty-thumbnailer',
-        version='0.1.7',
+        version='0.1.8',
         description='sorl.thumbnail inspired image thumbnailer',
         long_description=open('README').read(),
         author='Andrey Grygoryev',
